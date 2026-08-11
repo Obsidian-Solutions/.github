@@ -59,7 +59,7 @@ appointed representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behaviour may be
 reported by contacting the project team at
-[INSERT CONTACT EMAIL ADDRESS]. All complaints will be reviewed and
+security@obsidiansolutions.co.uk. All complaints will be reviewed and
 investigated and will result in a response that is deemed necessary and
 appropriate to the circumstances. The project team is obligated to maintain
 confidentiality with regard to the reporter of an incident.

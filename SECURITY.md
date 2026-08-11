@@ -13,7 +13,7 @@ fixes.
 ## Reporting a Vulnerability
 
 If you have found a security vulnerability in this project, report it
-privately to [INSERT SECURITY CONTACT EMAIL]. Do not open a public issue for
+privately to security@obsidiansolutions.co.uk. Do not open a public issue for
 a security problem.
 
 When you report a vulnerability, include:
