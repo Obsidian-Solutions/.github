@@ -1,0 +1,54 @@
+# CodeQL analysis
+
+# Static analysis (SAST) per the NCSC secure-development standard.
+# Code scanning requires GitHub Advanced Security on private repositories,
+# so this workflow runs on public repositories only. On a private repo the
+# job is skipped, not failed. For SAST on private repos without GHAS, use
+# an alternative scanner such as Semgrep OSS in CI.
+# When GitHub prompts you to enable default code scanning setup on a
+# public repo, leave it off: default setup conflicts with this workflow
+# and the analysis upload is rejected.
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "21 3 * * 1"
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    if: ${{ !github.event.repository.private }}
+    name: Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{matrix.language}}"

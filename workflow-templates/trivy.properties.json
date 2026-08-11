@@ -1,0 +1,1 @@
+{"name":"Container Scan (Trivy)","description":"Scan Docker images for CRITICAL and HIGH vulnerabilities.","filePatterns":["Dockerfile"]}

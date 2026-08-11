@@ -1,0 +1,32 @@
+# Infrastructure-as-code scan (Checkov)
+# Runs on pushes and pull requests that change Terraform or Bicep files.
+# Fails the run on security misconfigurations.
+
+name: IaC scan
+
+on:
+  push:
+    branches: [main]
+    paths: ["**/*.tf", "**/*.bicep"]
+  pull_request:
+    branches: [main]
+    paths: ["**/*.tf", "**/*.bicep"]
+
+permissions:
+  contents: read
+
+jobs:
+  checkov:
+    name: Checkov
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          framework: terraform,bicep,cloudformation,kubernetes
+          quiet: true
+          soft_fail: false

@@ -1,0 +1,40 @@
+# Container image vulnerability scan (Trivy)
+# Runs on pushes and pull requests that change a Dockerfile at the repo root.
+# Fails the run when CRITICAL or HIGH vulnerabilities are found in the image.
+# No GitHub Advanced Security needed: the scan fails on findings directly.
+
+name: Container scan
+
+on:
+  push:
+    branches: [main]
+    paths: ["Dockerfile"]
+  pull_request:
+    branches: [main]
+    paths: ["Dockerfile"]
+  schedule:
+    - cron: "21 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  trivy:
+    name: Trivy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t app:ci .
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: app:ci
+          format: table
+          exit-code: 1
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true

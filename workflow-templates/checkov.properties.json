@@ -1,0 +1,1 @@
+{"name":"IaC Scan (Checkov)","description":"Scan Terraform and Bicep for security misconfigurations.","filePatterns":["*.tf","*.bicep"]}

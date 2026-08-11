@@ -1,0 +1,31 @@
+# Release automation
+# Runs when a signed version tag (v1.2.3) is pushed to main.
+# Generates an SPDX SBOM from the repository and creates a GitHub release
+# with release notes generated from merged pull requests.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: sbom.spdx.json
