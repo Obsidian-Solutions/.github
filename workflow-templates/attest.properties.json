@@ -1,0 +1,1 @@
+{"name":"Attest release assets","description":"Sign release assets with the workflow's OIDC identity so downloaders can verify provenance.","filePatterns":[]}

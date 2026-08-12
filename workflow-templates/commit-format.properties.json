@@ -1,0 +1,1 @@
+{"name":"Commit format check","description":"Enforce the GDS-style commit message format on every pull request.","filePatterns":[]}
