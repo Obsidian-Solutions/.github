@@ -22,10 +22,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
+        uses: bridgecrewio/checkov-action@33bef1e73cddbbe71130328ff1a333c1c24f43d3 # v12.3021.0
         with:
           framework: terraform,bicep,cloudformation,kubernetes
           quiet: true

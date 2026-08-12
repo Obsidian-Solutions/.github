@@ -1,7 +1,9 @@
 # Release automation
-# Runs when a signed version tag (v1.2.3) is pushed to main.
-# Generates an SPDX SBOM from the repository and creates a GitHub release
-# with release notes generated from merged pull requests.
+# Runs when a version tag (v1.2.3) is pushed to main.
+# Generates an SPDX SBOM and drafts a GitHub release with release
+# notes generated from merged pull requests. A human reviews the
+# draft and publishes it. The job runs in the protected release
+# environment, which records the deployment.
 
 name: Release
 
@@ -16,16 +18,18 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    environment: release
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         with:
           generate_release_notes: true
+          draft: true
           files: sbom.spdx.json
