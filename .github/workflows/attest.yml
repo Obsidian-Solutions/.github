@@ -1,0 +1,35 @@
+# Reusable attestation. Called from each repository's own attest.yml
+# when a release is published. Signs every release asset with the
+# workflow's OIDC identity, so a downloader can verify provenance
+# (JSP 945 release process). workflow_call means it never triggers
+# itself; the caller declares the release event.
+
+name: Attest release assets
+
+on:
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  attest:
+    name: Attest release assets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download the release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+        run: |
+          mkdir assets && cd assets
+          gh release download "$TAG"
+          ls -1
+
+      - name: Attest the release assets
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: assets/*
