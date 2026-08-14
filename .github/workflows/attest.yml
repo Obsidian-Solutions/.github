@@ -12,6 +12,13 @@ on:
 permissions:
   id-token: write
   contents: read
+  # The attest-build-provenance action POSTs the attestation to
+  # /repos/attestations. This permission must live here: a reusable
+  # workflow's own permissions block REPLACES the caller's, so the
+  # caller's attestations: write never flows through (the caller-side
+  # fix alone still fails with 'Resource not accessible by
+  # integration').
+  attestations: write
 
 jobs:
   attest:
