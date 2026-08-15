@@ -28,7 +28,7 @@ jobs:
           while IFS= read -r subject; do
             case "$subject" in
               Revert*) continue ;;
-              chore(deps)*) continue ;;  # dependabot generates these
+              chore\(deps\)*) continue ;;  # dependabot generates these
               [a-z]*": "*) ;;
               *)
                 echo "Invalid subject (expected 'component: imperative summary'):"
