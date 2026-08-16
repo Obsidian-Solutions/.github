@@ -71,7 +71,10 @@ jobs:
             exit 0
           fi
 
-          # Close any previous audit issue, then file a fresh one.
+          # Ensure the audit label exists, then close any previous issue.
+          gh label create protection-audit --repo "$OWNER/.github" \
+            --description "Repo protection audit findings" \
+            --color B60205 >/dev/null 2>&1 || true
           EXISTING=$(gh issue list --repo "$OWNER/.github" \
             --label "protection-audit" --state open --json number \
             --jq '.[].number' 2>/dev/null || true)
@@ -80,7 +83,7 @@ jobs:
               --comment "Superseded by the latest audit." >/dev/null
           done
 
-          BODY=$(printf "## Repo protection audit - %s\n\nDrift detected in the following repositories:\n\n%sRun \\`scripts/protect-repo.sh <repo>\\` from the .github repo to remediate.\n" "$(date -u +%Y-%m-%d)" "$DRIFTED")
+          BODY=$(printf "## Repo protection audit - %s\n\nDrift detected in the following repositories:\n\n%sRun scripts/protect-repo.sh from the .github repo to remediate.\n" "$(date -u +%Y-%m-%d)" "$DRIFTED")
           gh issue create --repo "$OWNER/.github" \
             --title "Protection drift: $(date -u +%Y-%m-%d)" \
             --body "$BODY" --label "protection-audit" >/dev/null
