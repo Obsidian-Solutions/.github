@@ -1,0 +1,47 @@
+# Dependabot keep-current: reusable workflow.
+# Updates every open dependabot PR's branch with the latest main, so
+# manual changes to main do not leave dependabot PRs stale.
+#
+# Call from each repo that uses dependabot:
+#
+#   name: Dependabot keep current
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+#   permissions:
+#     contents: write
+#     pull-requests: write
+#   jobs:
+#     update:
+#       uses: Obsidian-Solutions/.github/.github/workflows/dependabot-update-branch.yml@<sha>
+
+name: Dependabot update branch
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-branches:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update open dependabot PR branches
+        run: |
+          PRS=$(gh pr list --state open --json number,author \
+            --jq '.[] | select(.author.login == "dependabot[bot]") | .number')
+          if [ -z "$PRS" ]; then
+            echo "No open dependabot PRs to update."
+            exit 0
+          fi
+          for PR in $PRS; do
+            echo "Updating PR #$PR"
+            # ponytail: || true - a conflicted PR cannot be updated, leave
+            # it for dependabot to rebase or a human to resolve.
+            gh pr update-branch "$PR" || true
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
