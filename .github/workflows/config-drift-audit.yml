@@ -62,8 +62,7 @@ jobs:
               ISSUES="$ISSUES dependabot-updates"
             fi
             if [ -n "$ISSUES" ]; then
-              DRIFTED="$DRIFTED- **$REPO**:$ISSUES
-"
+              DRIFTED="${DRIFTED}- **${REPO}**:${ISSUES}"$'\n'
             fi
           done
 
