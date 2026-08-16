@@ -1,0 +1,44 @@
+# Dependabot auto-merge: reusable workflow.
+# Call from each repo that uses dependabot:
+#
+#   name: Dependabot auto-merge
+#   on:
+#     pull_request_target:
+#       types: [opened, synchronize, reopened, labeled]
+#   permissions:
+#     contents: write
+#     pull-requests: write
+#   jobs:
+#     auto-merge:
+#       uses: Obsidian-Solutions/.github/.github/workflows/dependabot-auto-merge.yml@<sha>
+#
+# Merges dependabot PRs when CI passes, skipping major version bumps
+# (semver-major needs a human decision). Only acts on PRs authored by
+# dependabot[bot]. ponytail: no approval step needed, branch protection
+# with 0 required reviewers + status checks gates the merge itself.
+
+name: Dependabot auto-merge
+
+on:
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
+
+      - name: Enable auto-merge for non-major updates
+        if: steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: |
+          gh pr merge "$PR_URL" --auto --squash
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
