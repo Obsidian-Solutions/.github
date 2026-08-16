@@ -1,0 +1,24 @@
+# Auto-assign new issues and PRs to the maintainer.
+# Reusable workflow: callers carry the triggers (issues + pull_request).
+# ponytail: solo org, so this is mostly ceremony - every issue is already
+# the maintainer's. Kept for completeness; harmless.
+
+name: Auto assign
+
+on:
+  workflow_call:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  assign:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-assign
+        uses: pozil/auto-assign-issue@2f3e41b009e91b530f973eff2538ec9b04d9f403 # v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          assignees: MBarkerUK
+          numOfAssignee: 1
