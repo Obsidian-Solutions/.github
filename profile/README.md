@@ -13,4 +13,4 @@ Remote IT and cyber security services for business:
 ## Security
 
 Report a vulnerability in any repository per the
-[security policy](SECURITY.md).
+[security policy](https://github.com/Obsidian-Solutions/.github/security).
