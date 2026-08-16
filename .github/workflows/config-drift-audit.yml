@@ -80,12 +80,7 @@ jobs:
               --comment "Superseded by the latest audit." >/dev/null
           done
 
-          BODY="## Repo protection audit - $(date -u +%Y-%m-%d)
-
-Drift detected in the following repositories:
-
-$DRIFTED
-Run \`scripts/protect-repo.sh <repo>\` from the .github repo to remediate."
+          BODY=$(printf "## Repo protection audit - %s\n\nDrift detected in the following repositories:\n\n%sRun \\`scripts/protect-repo.sh <repo>\\` from the .github repo to remediate.\n" "$(date -u +%Y-%m-%d)" "$DRIFTED")
           gh issue create --repo "$OWNER/.github" \
             --title "Protection drift: $(date -u +%Y-%m-%d)" \
             --body "$BODY" --label "protection-audit" >/dev/null
