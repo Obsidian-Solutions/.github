@@ -10,4 +10,4 @@ permissions:
 
 jobs:
   lint:
-    uses: Obsidian-Solutions/.github/.github/workflows/actionlint.yml@5ff5a7a5b5e5123469311a72ccb8eb56ab08ccd9
+    uses: Obsidian-Solutions/.github/.github/workflows/actionlint.yml@f7e08abb84a2fb948b6ca3d5e095b34c027d12a7
