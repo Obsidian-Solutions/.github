@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Update open dependabot PR branches
         run: |
-          PRS=$(gh pr list --state open --json number,author \
+          PRS=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number,author \
             --jq '.[] | select(.author.login == "dependabot[bot]") | .number')
           if [ -z "$PRS" ]; then
             echo "No open dependabot PRs to update."
