@@ -61,6 +61,16 @@ jobs:
             if [ "$DSU" != "enabled" ]; then
               ISSUES="$ISSUES dependabot-updates"
             fi
+            # Private vulnerability reporting
+            if ! gh api "repos/$OWNER/$REPO/private-vulnerability-reporting" \
+                >/dev/null 2>&1; then
+              ISSUES="$ISSUES private-vuln-reporting"
+            fi
+            # Default branch must be main
+            DB=$(gh api "repos/$OWNER/$REPO" --jq '.default_branch' 2>/dev/null || echo missing)
+            if [ "$DB" != "main" ]; then
+              ISSUES="$ISSUES default-branch-not-main"
+            fi
             if [ -n "$ISSUES" ]; then
               DRIFTED="${DRIFTED}- **${REPO}**:${ISSUES}"$'\n'
             fi
