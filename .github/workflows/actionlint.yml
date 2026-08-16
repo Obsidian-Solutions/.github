@@ -1,0 +1,23 @@
+# Actionlint: validates every workflow file in the repo.
+# A workflow with a YAML or schema error fails at startup with a useless
+# message. This gate catches it at merge time.
+# Called by a caller in each repo:
+#   uses: Obsidian-Solutions/.github/.github/workflows/actionlint.yml@<sha>
+
+name: actionlint
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run actionlint on all workflows
+        uses: docker://rhysd/actionlint:latest
