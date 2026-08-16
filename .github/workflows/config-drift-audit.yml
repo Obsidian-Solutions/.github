@@ -1,0 +1,93 @@
+# Weekly audit of repository protection and security settings.
+# Files one issue per drifted repo so a repo created without running
+# protect-repo.sh surfaces instead of staying silently unprotected.
+#
+# Requires an org secret OBSIDIAN_AUDIT_TOKEN: a fine-grained PAT with
+# administration:read and issues:write on all repositories. Without it,
+# the job skips with a warning. Create it at:
+# https://github.com/settings/personal-access-tokens/new
+# (Repository access: All repositories of Obsidian-Solutions)
+
+name: Repo protection audit
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check token
+        id: token
+        env:
+          GH_TOKEN: ${{ secrets.OBSIDIAN_AUDIT_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::OBSIDIAN_AUDIT_TOKEN not set - audit skipped"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Audit all non-archived repos
+        if: steps.token.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.OBSIDIAN_AUDIT_TOKEN }}
+        run: |
+          set -euo pipefail
+          OWNER="Obsidian-Solutions"
+          DRIFTED=""
+          for REPO in $(gh api "orgs/$OWNER/repos?per_page=100&type=all" \
+              --jq '.[] | select(.archived == false) | .name'); do
+            ISSUES=""
+            # Branch protection on the default branch
+            if ! gh api "repos/$OWNER/$REPO/branches/main/protection" \
+                >/dev/null 2>&1; then
+              ISSUES="$ISSUES branch-protection"
+            fi
+            # Secret scanning
+            SS=$(gh api "repos/$OWNER/$REPO" \
+              --jq '.security_and_analysis.secret_scanning.status' 2>/dev/null || echo missing)
+            if [ "$SS" != "enabled" ]; then
+              ISSUES="$ISSUES secret-scanning"
+            fi
+            # Dependabot security updates
+            DSU=$(gh api "repos/$OWNER/$REPO" \
+              --jq '.security_and_analysis.dependabot_security_updates.status' 2>/dev/null || echo missing)
+            if [ "$DSU" != "enabled" ]; then
+              ISSUES="$ISSUES dependabot-updates"
+            fi
+            if [ -n "$ISSUES" ]; then
+              DRIFTED="$DRIFTED- **$REPO**:$ISSUES
+"
+            fi
+          done
+
+          if [ -z "$DRIFTED" ]; then
+            echo "All repos protected. No drift."
+            exit 0
+          fi
+
+          # Close any previous audit issue, then file a fresh one.
+          EXISTING=$(gh issue list --repo "$OWNER/.github" \
+            --label "protection-audit" --state open --json number \
+            --jq '.[].number' 2>/dev/null || true)
+          for N in $EXISTING; do
+            gh issue close "$N" --repo "$OWNER/.github" \
+              --comment "Superseded by the latest audit." >/dev/null
+          done
+
+          BODY="## Repo protection audit - $(date -u +%Y-%m-%d)
+
+Drift detected in the following repositories:
+
+$DRIFTED
+Run \`scripts/protect-repo.sh <repo>\` from the .github repo to remediate."
+          gh issue create --repo "$OWNER/.github" \
+            --title "Protection drift: $(date -u +%Y-%m-%d)" \
+            --body "$BODY" --label "protection-audit" >/dev/null
+          echo "Filed drift issue."
