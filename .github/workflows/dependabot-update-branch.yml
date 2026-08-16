@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Update open dependabot PR branches
         run: |
-          PRS=$(gh pr list --state open --json number,author \
+          PRS=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --json number,author \
             --jq '.[] | select(.author.login == "dependabot[bot]") | .number')
           if [ -z "$PRS" ]; then
             echo "No open dependabot PRs to update."
@@ -41,7 +41,7 @@ jobs:
             echo "Updating PR #$PR"
             # ponytail: || true - a conflicted PR cannot be updated, leave
             # it for dependabot to rebase or a human to resolve.
-            gh pr update-branch "$PR" || true
+            gh api --method PUT "repos/${GITHUB_REPOSITORY}/pulls/${PR}/update-branch" || true
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
